@@ -39,12 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cloudinary_storage',
     'cloudinary',
-    'django_restframework',
+    'rest_framework',
 
     'scheduling',
     'authentication',
     'booking',
-    'hr_system',
+    'sst_hr',
     'profiles',
     'news',
 ]
