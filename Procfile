@@ -1,0 +1,1 @@
+web: gunicorn sst_hr.wsgi
