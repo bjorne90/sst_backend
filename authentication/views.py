@@ -1,65 +1,38 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.contrib.auth import authenticate, login, logout
-from .forms import UserRegistrationForm
-from scheduling.models import WorkShift
-from .models import UserProfile
-from django.contrib.auth.forms import UserCreationForm
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserSerializer, UserSerializerWithToken
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
+class UserCreate(APIView):
+    permission_classes = [AllowAny]
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            try:
-                user_profile = user.profile
-            except UserProfile.DoesNotExist:
-                user_profile = UserProfile.objects.create(user=user)
+    def post(self, request, format='json'):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            if user:
+                json = serializer.data
+                return Response(json, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            # Send registration confirmation email
-            send_registration_confirmation_email(user)
+class UserLogin(APIView):
+    permission_classes = [AllowAny]
 
-            return redirect(reverse('profiles:profile_detail'))
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'authentication/register.html', {'form': form})
-
-
-def send_registration_confirmation_email(user):
-    subject = 'Registration Confirmation'
-    template_name = 'authentication/registration_email_template.html'
-    context = {'username': user.username}
-    html_message = render_to_string(template_name, context)
-    recipient_list = [user.email]
-
-    send_mail(subject, '', from_email=None, recipient_list=recipient_list, html_message=html_message)
-
-
-
-def user_login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+    def post(self, request, format='json'):
+        data = request.data
+        username = data.get('username', '')
+        password = data.get('password', '')
+        user = authenticate(username=username, password=password)
         if user is not None:
-            login(request, user)
             try:
                 user_profile = user.profile
             except UserProfile.DoesNotExist:
                 user_profile = UserProfile.objects.create(user=user)
-            return redirect(reverse('profiles:profile_detail'))
-        else:
-            return render(request, 'authentication/login.html', {'error': 'Invalid login credentials'})
-    return render(request, 'authentication/login.html')
-
-
-def user_logout(request):
-    logout(request)
-    return redirect('authentication:login')
-
-def user_login2(request):
-    return render(request, 'authentication/login_registration.html')
+            refresh = RefreshToken.for_user(user)
+            serializer = UserSerializerWithToken(user, context={'request': request})
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'user': serializer.data})
+        return Response({'detail': 'Invalid login credentials'}, status=status.HTTP_401_UNAUTHORIZED)

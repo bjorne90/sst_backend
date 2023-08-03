@@ -1,0 +1,9 @@
+<h1>Du är bokad på arbetspass!</h1>
+<p>Du är bokad på följande arbetspass från Skånes Sjukvårdstjänst:</p>
+<ul>
+    <li>Event: {{ workshift.event }}</li>
+    <li>Plats: {{ workshift.location }}</li>
+    <li>Starttid: {{ workshift.start_time|date:'H:i' }}</li>
+    <li>Sluttid: {{ workshift.end_time|date:'H:i' }}</li>
+    <li>Roll: {{ workshift.role }}</li>
+</ul>
