@@ -8,7 +8,7 @@ from booking.models import Booking
 User = get_user_model()
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='auth_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
     phone_number = models.CharField(max_length=20)
     address = models.CharField(max_length=200)
     booked_workshifts = models.ManyToManyField(Booking, related_name='booked_users')
@@ -23,4 +23,4 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.auth_profile.save()
+    UserProfile.objects.get_or_create(user=instance)
