@@ -84,7 +84,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',  # or the address where your React app is served
+    'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174',  # or the address where your React app is served
 ]
 
 # Simple JWT settings
