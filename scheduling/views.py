@@ -8,14 +8,18 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from rest_framework.permissions import IsAuthenticated
+
 
 class WorkShiftListCreateView(generics.ListCreateAPIView):
     queryset = WorkShift.objects.all()
     serializer_class = WorkShiftSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_profile = self.request.user.profile
+        print(self.request.user)  # Log the user
+        print(user_profile)      # Log the profile associated with the user
         now = timezone.now()
         return user_profile.booked_workshifts.filter(start_time__gt=now)
 
