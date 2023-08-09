@@ -23,6 +23,10 @@ class WorkShiftListCreateView(generics.ListCreateAPIView):
         now = timezone.now()
         return user_profile.booked_workshifts.filter(start_time__gt=now)
 
+class ListAllWorkShiftsView(generics.ListAPIView):
+    queryset = WorkShift.objects.all()
+    serializer_class = WorkShiftSerializer
+
 class BookWorkShiftView(generics.CreateAPIView):
     queryset = WorkShift.objects.filter(is_booked=False)
     serializer_class = WorkShiftSerializer
