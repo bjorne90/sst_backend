@@ -5,10 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.core.validators import MaxLengthValidator
 
 class WorkShift(models.Model):
     event = models.CharField(max_length=100, default='Event')
     location = models.CharField(max_length=100, default='Location')
+    shift_details = models.TextField(validators=[MaxLengthValidator(400)], blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     role = models.CharField(max_length=100, blank=True)
