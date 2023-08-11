@@ -10,6 +10,10 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from rest_framework.permissions import IsAuthenticated
 
+class WorkShiftDetailView(generics.RetrieveAPIView):
+    queryset = WorkShift.objects.all()
+    serializer_class = WorkShiftSerializer
+
 
 class WorkShiftListCreateView(generics.ListCreateAPIView):
     queryset = WorkShift.objects.all()
