@@ -12,7 +12,7 @@ class CustomSplitDateTimeWidget(AdminSplitDateTime):
 
 class BookingInline(admin.TabularInline):
     model = Booking
-    extra = 1
+    extra = 0
 
 class WorkShiftAdmin(admin.ModelAdmin):
     list_display = ('event', 'formatted_start_time', 'formatted_end_time', 'is_booked', 'role')

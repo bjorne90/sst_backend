@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
+from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from scheduling.models import WorkShift
+from booking.signals import booking_canceled
 
 User = get_user_model()
 
@@ -21,6 +23,7 @@ class Pass(models.Model):
 class Booking(models.Model):
     workshift = models.ForeignKey('scheduling.WorkShift', on_delete=models.CASCADE, related_name='bookings')
     users = models.ManyToManyField(User, related_name='bookings')
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Booking: {', '.join([str(user) for user in self.users.all()])} - {self.workshift}"
@@ -30,22 +33,12 @@ class WorkShift(models.Model):
     name = models.CharField(max_length=100)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    users = models.ManyToManyField(User, blank=True)
+    assigned_users = models.ManyToManyField(User, blank=True, related_name='assigned_shifts')
 
     def __str__(self):
         return self.name
     
-
-
-@receiver(post_save, sender=Booking)
-def send_booking_email(sender, instance, created, **kwargs):
-    if created:  # Check if a new booking record was created
-        # Send an email to each user
-        for user in instance.users.all():
-            subject = 'Shift Booking Confirmation'
-            message = 'You have been booked for a new shift.'
-            email_from = settings.DEFAULT_FROM_EMAIL  # Replace with your own email
-            recipient_list = [user.email]  # Send email to user
-
-            html_message = render_to_string('email/booking_confirmation.html', {'booking': instance})
-            send_mail(subject, message, email_from, recipient_list, html_message=html_message, fail_silently=False)
+@receiver(post_delete, sender=Booking)
+def booking_deleted(sender, instance, **kwargs):
+    # Trigger the booking_canceled signal when a booking is deleted
+    booking_canceled.send(sender=instance)

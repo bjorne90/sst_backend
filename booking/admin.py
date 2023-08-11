@@ -12,7 +12,7 @@ class BookingAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.ManyToManyField: {'widget': FilteredSelectMultiple(verbose_name='Users', is_stacked=False)},
     }
-    filter_horizontal = ('users',)
+    # filter_horizontal = ('users',)
 
 
 admin.site.register(Booking, BookingAdmin)

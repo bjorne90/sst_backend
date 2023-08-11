@@ -46,7 +46,11 @@ class BookWorkShiftView(generics.CreateAPIView):
             return Response({'detail': 'This workshift has already passed and cannot be booked.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create a new booking object
-        booking = Booking.objects.create(user=request.user, workshift=selected_workshift)
+        booking = Booking.objects.create(workshift=selected_workshift)
+
+        booking.users.add(request.user)
+
+        booking.save()
 
         # Update the user's profile with the booked workshift
         user_profile = request.user.profile
@@ -54,7 +58,7 @@ class BookWorkShiftView(generics.CreateAPIView):
         user_profile.save()
 
         # Update the availability of the workshift
-        selected_workshift.is_booked = True
+        selected_workshift.is_booked = False
         selected_workshift.save()
 
         # Send booking confirmation email
@@ -81,15 +85,17 @@ class CancelWorkShiftView(generics.UpdateAPIView):
         if workshift not in user_profile.booked_workshifts.all():
             return Response({'detail': 'You have not booked this workshift.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Remove the workshift from the user's booked workshifts
+        # Remove the user from the booked workshifts
         user_profile.booked_workshifts.remove(workshift)
         user_profile.save()
 
         # Update the availability of the workshift
         workshift.is_booked = False
+        workshift.users.remove(request.user)  # Remove the user from the workshift
         workshift.save()
 
         return Response({'detail': 'Workshift canceled successfully.'}, status=status.HTTP_200_OK)
+
 
 def send_email_notification(workshift, user):
     subject = 'Workshift Booking Confirmation'

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Ny bokning från systemet</h1>
+        </div>
+        <div class="content">
+            <p>Hej admin,</p>
+            <p>En användare har bokat sig på följande pass:</p>
+            <ul>
+                <li>Användare: {{ user }}</li>
+                <li>Datum: {{ workshift.date }}</li>
+                <li>Event: {{ workshift.start_time }} - {{ workshift.end_time }}</li>
+                <li>Roll: {{ workshift.role }}</li>
+            </ul>
+            <p>Logga in på adminpanelen för att granska och godkänna denna bokning.</p>
+        </div>
+        <div class="footer">
+            <p>Tack så mycket!</p>
+        </div>
+    </div>
+</body>
+</html>
